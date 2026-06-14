@@ -75,7 +75,11 @@ public class OCRActivity extends AppCompatActivity {
         }
 
         btnScan.setOnClickListener(v -> {
-            Toast.makeText(this, "Scanning...", Toast.LENGTH_SHORT).show();
+            if (detectedItems.isEmpty()) {
+                Toast.makeText(this, "Arahkan kamera ke daftar harga sampai muncul rincian!", Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(this, "Berhasil mendeteksi " + detectedItems.size() + " menu!", Toast.LENGTH_SHORT).show();
+            }
         });
 
         btnUseResult.setOnClickListener(v -> {
@@ -109,6 +113,7 @@ public class OCRActivity extends AppCompatActivity {
 
             } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();
+                Toast.makeText(this, "Gagal memulai kamera: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         }, ContextCompat.getMainExecutor(this));
     }
@@ -130,25 +135,37 @@ public class OCRActivity extends AppCompatActivity {
 
     private void extractPricesAndMenu(Text text) {
         detectedItems.clear();
-        StringBuilder result = new StringBuilder("Ditemukan:\n");
+        StringBuilder result = new StringBuilder("🔍 DETEKSI TEKS:\n");
+        String fullRawText = text.getText();
         
-        // Advanced logic: look for lines that have both text and numbers
+        if (fullRawText.isEmpty()) {
+            runOnUiThread(() -> tvResult.setText("Arahkan ke daftar harga struk..."));
+            return;
+        }
+
+        // Broad search for any currency-like numbers
+        Pattern pricePattern = Pattern.compile("(\\d{1,3}(?:[.,]\\d{3})+)");
+        
         for (Text.TextBlock block : text.getTextBlocks()) {
             for (Text.Line line : block.getLines()) {
-                String lineText = line.getText();
-                // Regex for price: usually at the end of line
-                Pattern pricePattern = Pattern.compile("(\\d{1,3}(?:[.,]\\d{3})+)$");
-                Matcher matcher = pricePattern.matcher(lineText.replace(" ", ""));
+                String lineText = line.getText().trim();
+                Matcher matcher = pricePattern.matcher(lineText);
                 
                 if (matcher.find()) {
                     String priceStr = matcher.group(1).replace(".", "").replace(",", "");
                     try {
                         double price = Double.parseDouble(priceStr);
-                        String name = lineText.replaceAll("(\\d{1,3}(?:[.,]\\d{3})+)$", "").trim();
-                        if (name.length() > 2) {
-                            detectedItems.add(new BillItem(name, price, 1));
-                            result.append("• ").append(name).append(" (Rp ").append(priceStr).append(")\n");
-                        }
+                        // Filter out small numbers that are likely not prices (e.g., dates, quantities)
+                        if (price < 100) continue; 
+
+                        String name = lineText.replace(matcher.group(1), "").trim();
+                        // Clean up name from garbage symbols
+                        name = name.replaceAll("[^a-zA-Z0-9 ]", "").trim();
+                        
+                        if (name.isEmpty()) name = "Menu " + (detectedItems.size() + 1);
+                        
+                        detectedItems.add(new BillItem(name, price, 1));
+                        result.append("✅ ").append(name).append(" -> Rp ").append(priceStr).append("\n");
                     } catch (Exception ignored) {}
                 }
             }
@@ -156,7 +173,7 @@ public class OCRActivity extends AppCompatActivity {
 
         if (detectedItems.isEmpty()) {
             runOnUiThread(() -> {
-                tvResult.setText("Arahkan ke daftar harga struk...");
+                tvResult.setText("Mendeteksi teks, tapi belum menemukan daftar harga...\n\nRaw: " + (fullRawText.length() > 50 ? fullRawText.substring(0, 50) : fullRawText));
                 btnUseResult.setVisibility(View.GONE);
             });
         } else {
