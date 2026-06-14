@@ -3,15 +3,22 @@ package com.example.appsplitbill;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.Button;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import com.example.appsplitbill.model.BillItem;
 import com.example.appsplitbill.utils.CurrencyFormatter;
 import com.google.android.material.button.MaterialButton;
@@ -19,7 +26,9 @@ import java.util.ArrayList;
 
 public class ItemizedSplitActivity extends AppCompatActivity {
     private ArrayList<BillItem> items = new ArrayList<>();
-    private double currentSubtotal = 0;
+    private ItemEditorAdapter adapter;
+    private TextView tvTotal;
+    private EditText etTax, etService, etDiscount;
 
     private final ActivityResultLauncher<Intent> ocrLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -27,29 +36,20 @@ public class ItemizedSplitActivity extends AppCompatActivity {
                 if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
                     ArrayList<BillItem> scannedItems = (ArrayList<BillItem>) result.getData().getSerializableExtra("DETECTED_ITEMS");
                     if (scannedItems != null) {
-                        for (BillItem item : scannedItems) {
-                            items.add(item);
-                            currentSubtotal += (item.getPrice() * item.getQuantity());
-                        }
-
-                        // Auto-fill Tax, Service, and Discount from Scan
+                        items.addAll(scannedItems);
+                        
                         double taxVal = result.getData().getDoubleExtra("DETECTED_TAX", 0);
                         double serviceVal = result.getData().getDoubleExtra("DETECTED_SERVICE", 0);
                         double discVal = result.getData().getDoubleExtra("DETECTED_DISCOUNT", 0);
 
-                        EditText etTax = findViewById(R.id.etItemTax);
-                        EditText etService = findViewById(R.id.etItemService);
-                        EditText etDiscount = findViewById(R.id.etItemDiscount);
-
-                        // If scan finds absolute nominal, convert to percent for Tax/Service
-                        if (taxVal > 0 && currentSubtotal > 0) etTax.setText(String.valueOf(Math.round((taxVal/currentSubtotal)*100)));
-                        if (serviceVal > 0 && currentSubtotal > 0) etService.setText(String.valueOf(Math.round((serviceVal/currentSubtotal)*100)));
+                        double sub = calculateSubtotal();
+                        if (taxVal > 0 && sub > 0) etTax.setText(String.valueOf(Math.round((taxVal/sub)*100)));
+                        if (serviceVal > 0 && sub > 0) etService.setText(String.valueOf(Math.round((serviceVal/sub)*100)));
                         if (discVal > 0) etDiscount.setText(String.valueOf((int)discVal));
 
-                        updateListAndTotal(findViewById(R.id.tvItemList), findViewById(R.id.tvTotalItemized),
-                                etTax, etService, etDiscount);
-                        
-                        Toast.makeText(this, scannedItems.size() + " menu & biaya tambahan ditambahkan. Silakan cek/edit!", Toast.LENGTH_LONG).show();
+                        adapter.notifyDataSetChanged();
+                        updateFinalTotal();
+                        Toast.makeText(this, scannedItems.size() + " menu ditambahkan. Kamu bisa edit jika ada typo!", Toast.LENGTH_LONG).show();
                     }
                 }
             }
@@ -68,18 +68,21 @@ public class ItemizedSplitActivity extends AppCompatActivity {
         EditText etName = findViewById(R.id.etItemName);
         EditText etPrice = findViewById(R.id.etItemPrice);
         EditText etQty = findViewById(R.id.etItemQty);
-        EditText etTax = findViewById(R.id.etItemTax);
-        EditText etService = findViewById(R.id.etItemService);
-        EditText etDiscount = findViewById(R.id.etItemDiscount);
+        etTax = findViewById(R.id.etItemTax);
+        etService = findViewById(R.id.etItemService);
+        etDiscount = findViewById(R.id.etItemDiscount);
+        tvTotal = findViewById(R.id.tvTotalItemized);
+        
         MaterialButton btnAdd = findViewById(R.id.btnAddItem);
         MaterialButton btnScan = findViewById(R.id.btnScanBill);
-        TextView tvList = findViewById(R.id.tvItemList);
-        TextView tvTotal = findViewById(R.id.tvTotalItemized);
         MaterialButton btnNext = findViewById(R.id.btnNextItemized);
 
-        if (btnScan != null) {
-            btnScan.setOnClickListener(v -> ocrLauncher.launch(new Intent(this, OCRActivity.class)));
-        }
+        RecyclerView rv = findViewById(R.id.rvItemEditor);
+        rv.setLayoutManager(new LinearLayoutManager(this));
+        adapter = new ItemEditorAdapter();
+        rv.setAdapter(adapter);
+
+        btnScan.setOnClickListener(v -> ocrLauncher.launch(new Intent(this, OCRActivity.class)));
 
         if (getIntent().getBooleanExtra("OPEN_OCR", false)) {
             ocrLauncher.launch(new Intent(this, OCRActivity.class));
@@ -88,7 +91,7 @@ public class ItemizedSplitActivity extends AppCompatActivity {
         btnAdd.setOnClickListener(v -> {
             String name = etName.getText().toString();
             String priceS = etPrice.getText().toString();
-            String qtyS = etQty != null ? etQty.getText().toString() : "1";
+            String qtyS = etQty.getText().toString();
 
             if (name.isEmpty() || priceS.isEmpty()) {
                 Toast.makeText(this, "Isi nama dan harga!", Toast.LENGTH_SHORT).show();
@@ -98,79 +101,124 @@ public class ItemizedSplitActivity extends AppCompatActivity {
             try {
                 double price = Double.parseDouble(priceS);
                 int qty = qtyS.isEmpty() ? 1 : Integer.parseInt(qtyS);
-                
                 items.add(new BillItem(name, price, qty));
-                currentSubtotal += (price * qty);
-
-                updateListAndTotal(tvList, tvTotal, etTax, etService, etDiscount);
-
+                adapter.notifyItemInserted(items.size() - 1);
+                updateFinalTotal();
+                
                 etName.setText("");
                 etPrice.setText("");
-                if (etQty != null) etQty.setText("1");
+                etQty.setText("1");
+                etName.requestFocus();
             } catch (Exception e) {
                 Toast.makeText(this, "Input tidak valid!", Toast.LENGTH_SHORT).show();
             }
         });
+
+        TextWatcher watcher = new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            @Override public void afterTextChanged(Editable s) { updateFinalTotal(); }
+        };
+        etTax.addTextChangedListener(watcher);
+        etService.addTextChangedListener(watcher);
+        etDiscount.addTextChangedListener(watcher);
 
         btnNext.setOnClickListener(v -> {
             if (items.isEmpty()) {
                 Toast.makeText(this, "Tambah item dulu!", Toast.LENGTH_SHORT).show();
                 return;
             }
-            
             String title = etTitle.getText().toString().trim();
             if (title.isEmpty()) title = "Tagihan Per Item";
-
-            String taxS = etTax.getText().toString();
-            String serviceS = etService.getText().toString();
-            String discS = etDiscount.getText().toString();
-            double taxPercent = taxS.isEmpty() ? 0 : Double.parseDouble(taxS);
-            double servicePercent = serviceS.isEmpty() ? 0 : Double.parseDouble(serviceS);
-            double discVal = discS.isEmpty() ? 0 : Double.parseDouble(discS);
             
-            double taxAmount = (currentSubtotal * taxPercent / 100);
-            double serviceAmount = (currentSubtotal * servicePercent / 100);
-
             Intent intent = new Intent(this, SelectPeopleActivity.class);
             intent.putExtra("TITLE", title);
             intent.putExtra("ITEMS", items);
-            intent.putExtra("TAX_AMOUNT", taxAmount);
-            intent.putExtra("SERVICE_AMOUNT", serviceAmount);
-            intent.putExtra("DISCOUNT", discVal);
+            intent.putExtra("TAX_AMOUNT", (calculateSubtotal() * getDouble(etTax) / 100));
+            intent.putExtra("SERVICE_AMOUNT", (calculateSubtotal() * getDouble(etService) / 100));
+            intent.putExtra("DISCOUNT", getDouble(etDiscount));
             startActivity(intent);
         });
     }
 
-    private void updateListAndTotal(TextView tvList, TextView tvTotal, EditText etTax, EditText etService, EditText etDiscount) {
-        if (items.isEmpty()) {
-            tvList.setText("Belum ada item.");
-            tvTotal.setText("Estimasi Total: Rp 0");
-            return;
-        }
-
-        StringBuilder sb = new StringBuilder();
-        for (BillItem item : items) {
-            sb.append("• ").append(item.getName())
-              .append(" x").append(item.getQuantity())
-              .append(" (").append(CurrencyFormatter.formatRupiah(item.getPrice() * item.getQuantity()))
-              .append(")\n");
-        }
-        tvList.setText(sb.toString());
-        
-        String taxS = etTax.getText().toString();
-        String serviceS = etService.getText().toString();
-        String discS = etDiscount.getText().toString();
-        double taxP = taxS.isEmpty() ? 0 : Double.parseDouble(taxS);
-        double serviceP = serviceS.isEmpty() ? 0 : Double.parseDouble(serviceS);
-        double disc = discS.isEmpty() ? 0 : Double.parseDouble(discS);
-        
-        double total = currentSubtotal + (currentSubtotal * taxP / 100) + (currentSubtotal * serviceP / 100) - disc;
-        tvTotal.setText("Estimasi Total: " + CurrencyFormatter.formatRupiah(total));
+    private double calculateSubtotal() {
+        double sub = 0;
+        for (BillItem item : items) sub += (item.getPrice() * item.getQuantity());
+        return sub;
     }
 
-    @Override
-    public boolean onSupportNavigateUp() {
-        onBackPressed();
-        return true;
+    private void updateFinalTotal() {
+        double sub = calculateSubtotal();
+        double total = sub + (sub * getDouble(etTax) / 100) + (sub * getDouble(etService) / 100) - getDouble(etDiscount);
+        tvTotal.setText("Total: " + CurrencyFormatter.formatRupiah(total));
     }
+
+    private double getDouble(EditText et) {
+        String s = et.getText().toString();
+        return s.isEmpty() ? 0 : Double.parseDouble(s);
+    }
+
+    private class ItemEditorAdapter extends RecyclerView.Adapter<ItemEditorAdapter.ViewHolder> {
+        @NonNull @Override
+        public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            return new ViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_bill_item_edit, parent, false));
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+            BillItem item = items.get(position);
+            
+            // Remove previous watchers to avoid recursion/multicalls
+            if (holder.nameWatcher != null) holder.etName.removeTextChangedListener(holder.nameWatcher);
+            if (holder.priceWatcher != null) holder.etPrice.removeTextChangedListener(holder.priceWatcher);
+            if (holder.qtyWatcher != null) holder.etQty.removeTextChangedListener(holder.qtyWatcher);
+
+            holder.etName.setText(item.getName());
+            holder.etPrice.setText(String.valueOf((int)item.getPrice()));
+            holder.etQty.setText(String.valueOf(item.getQuantity()));
+
+            holder.nameWatcher = new SimpleTextWatcher(s -> { item.setName(s); });
+            holder.priceWatcher = new SimpleTextWatcher(s -> { try { item.setPrice(Double.parseDouble(s)); updateFinalTotal(); } catch(Exception ignored){} });
+            holder.qtyWatcher = new SimpleTextWatcher(s -> { try { item.setQuantity(Integer.parseInt(s)); updateFinalTotal(); } catch(Exception ignored){} });
+
+            holder.etName.addTextChangedListener(holder.nameWatcher);
+            holder.etPrice.addTextChangedListener(holder.priceWatcher);
+            holder.etQty.addTextChangedListener(holder.qtyWatcher);
+
+            holder.btnRemove.setOnClickListener(v -> {
+                int pos = holder.getAdapterPosition();
+                if (pos != RecyclerView.NO_POSITION) {
+                    items.remove(pos);
+                    notifyItemRemoved(pos);
+                    updateFinalTotal();
+                }
+            });
+        }
+
+        @Override public int getItemCount() { return items.size(); }
+
+        class ViewHolder extends RecyclerView.ViewHolder {
+            EditText etName, etPrice, etQty;
+            ImageButton btnRemove;
+            TextWatcher nameWatcher, priceWatcher, qtyWatcher;
+            public ViewHolder(@NonNull View v) {
+                super(v);
+                etName = v.findViewById(R.id.etEditItemName);
+                etPrice = v.findViewById(R.id.etEditItemPrice);
+                etQty = v.findViewById(R.id.etEditItemQty);
+                btnRemove = v.findViewById(R.id.btnRemoveItem);
+            }
+        }
+    }
+
+    private interface OnTextChange { void onTextChanged(String s); }
+    private class SimpleTextWatcher implements TextWatcher {
+        private OnTextChange listener;
+        public SimpleTextWatcher(OnTextChange listener) { this.listener = listener; }
+        @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+        @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+        @Override public void afterTextChanged(Editable s) { listener.onTextChanged(s.toString()); }
+    }
+
+    @Override public boolean onSupportNavigateUp() { onBackPressed(); return true; }
 }
