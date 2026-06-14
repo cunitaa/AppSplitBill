@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/background_default"
+    android:fitsSystemWindows="true">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbarPeople"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/blue_primary"
+        app:title="Pilih Orang"
+        app:titleTextColor="@android:color/white"
+        app:navigationIcon="?attr/homeAsUpIndicator" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Nama Teman Baru"
+            android:layout_marginBottom="12dp"
+            app:startIconDrawable="@android:drawable/ic_menu_myplaces">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etPersonName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPersonName"
+                android:textColor="@color/text_primary" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnAddPerson"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="TAMBAH NAMA"
+            app:cornerRadius="12dp"
+            android:padding="12dp"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Select from Groups -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Pilih dari Grup:"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:textColor="@color/blue_primary"
+            android:layout_marginBottom="4dp"/>
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/cgMyGroups"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            app:chipSpacingVertical="4dp"
+            app:chipSpacingHorizontal="4dp" />
+
+        <!-- Select from Friends -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Pilih dari Teman:"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:textColor="@color/blue_primary"
+            android:layout_marginBottom="4dp"/>
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/cgMyFriends"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:chipSpacingVertical="4dp"
+            app:chipSpacingHorizontal="4dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Anggota Terpilih:"
+            android:textStyle="bold"
+            android:textColor="@color/text_primary"
+            android:layout_marginBottom="8dp"/>
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+            <TextView
+                android:id="@+id/tvPeopleList"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Belum ada yang dipilih."
+                android:background="@color/surface_default"
+                android:textColor="@color/text_primary"
+                android:padding="12dp"/>
+        </ScrollView>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnFinishItemized"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="LANJUT"
+            app:cornerRadius="12dp"
+            android:padding="14dp"
+            android:layout_marginTop="16dp"
+            android:backgroundTint="@color/blue_primary"/>
+    </LinearLayout>
+</LinearLayout>

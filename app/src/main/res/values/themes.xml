@@ -1,0 +1,24 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.AppSplitBill" parent="Theme.Material3.Light.NoActionBar">
+        <!-- Customize your light theme here. -->
+        <item name="colorPrimary">@color/blue_primary</item>
+        <item name="colorSecondary">@color/blue_accent</item>
+        <item name="android:windowBackground">@color/blue_light</item>
+
+        <!-- Fix status bar overlap -->
+        <item name="android:windowTranslucentStatus">false</item>
+        <item name="android:statusBarColor">@color/blue_dark</item>
+    </style>
+
+    <style name="Theme.AppSplitBill" parent="Base.Theme.AppSplitBill" />
+
+    <!-- Style for results display -->
+    <style name="StatusPending">
+        <item name="android:textColor">@color/warning_orange</item>
+        <item name="android:background">@drawable/bg_status_pending</item>
+        <item name="android:padding">4dp</item>
+        <item name="android:textSize">10sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+</resources>

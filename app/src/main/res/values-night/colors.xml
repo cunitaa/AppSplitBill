@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Backgrounds (IG Style: Deep Black) -->
+    <color name="background_default">#000000</color>
+    <color name="surface_default">#121212</color>
+    <color name="surface_elevated">#1E1E1E</color>
+
+    <!-- Text Colors -->
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#B0B0B0</color>
+    <color name="text_hint">#666666</color>
+
+    <!-- App Colors adapted for Dark -->
+    <color name="blue_light">#1A1A1A</color> <!-- Replaced light blue with dark surface -->
+    <color name="blue_primary">#3897F0</color> <!-- IG Blue -->
+    <color name="blue_dark">#FFFFFF</color> <!-- Title in dark mode usually white -->
+
+    <color name="black">#FFFFFF</color> <!-- Inverse black to white -->
+    <color name="white">#121212</color> <!-- Inverse white to surface -->
+
+    <color name="grey_light">#262626</color>
+    <color name="grey_dark">#8E8E8E</color>
+</resources>

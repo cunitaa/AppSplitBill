@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/background_default"
+    android:fitsSystemWindows="true">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbarQuick"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="#2196F3"
+        android:elevation="4dp"
+        app:title="Quick Split"
+        app:titleTextColor="@android:color/white"
+        app:navigationIcon="?attr/homeAsUpIndicator" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bagi Rata Cepat"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:textColor="#1976D2"
+                android:layout_marginBottom="24dp"/>
+
+            <EditText
+                android:id="@+id/etBillTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Judul Tagihan"
+                android:layout_marginBottom="12dp"
+                android:autofillHints="none"
+                android:inputType="text" />
+
+            <EditText
+                android:id="@+id/etTotalAmount"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Total Nominal (Rp)"
+                android:inputType="number"
+                android:layout_marginBottom="12dp"
+                android:autofillHints="none" />
+
+            <EditText
+                android:id="@+id/etNumPeople"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Jumlah Orang"
+                android:inputType="number"
+                android:layout_marginBottom="12dp"
+                android:autofillHints="none" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Metode Pembagian:"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp"/>
+
+            <RadioGroup
+                android:id="@+id/rgSplitMode"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="16dp">
+                <RadioButton
+                    android:id="@+id/rbEqual"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Bagi Rata"
+                    android:checked="true"/>
+                <RadioButton
+                    android:id="@+id/rbPercentage"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Persentase (%)"/>
+            </RadioGroup>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="24dp">
+                <EditText
+                    android:id="@+id/etTax"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="Pajak (%)"
+                    android:inputType="number"
+                    android:autofillHints="none" />
+                <EditText
+                    android:id="@+id/etServiceCharge"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="Servis (%)"
+                    android:inputType="number"
+                    android:autofillHints="none" />
+                <EditText
+                    android:id="@+id/etDiscount"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="Diskon (Rp)"
+                    android:inputType="number"
+                    android:autofillHints="none" />
+            </LinearLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnCalculateQuick"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="HITUNG &amp; BAGIKAN WA"
+                android:backgroundTint="@color/blue_primary"
+                android:padding="12dp"
+                app:cornerRadius="12dp"
+                android:layout_marginTop="8dp"/>
+
+            <TextView
+                android:id="@+id/tvQuickResult"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Hasil: Rp 0 / orang"
+                android:gravity="center"
+                android:layout_marginTop="24dp"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="#0D47A1"/>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

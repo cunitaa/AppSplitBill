@@ -1,0 +1,47 @@
+<resources>
+    <string name="app_name">AppSplitBill</string>
+    <string name="title_split_bill">Split Bill</string>
+    <string name="hint_total_bill">Total Tagihan</string>
+    <string name="hint_num_people">Jumlah Orang</string>
+    <string name="btn_calculate">Hitung</string>
+    <string name="label_result">Per Orang Harus Bayar:</string>
+    <string name="initial_result">Rp 0</string>
+
+    <!-- Auth -->
+    <string name="welcome_back">Selamat Datang!</string>
+    <string name="login_desc">Silakan masuk untuk melanjutkan</string>
+    <string name="register_desc">Buat Akun Baru</string>
+    <string name="no_account">Belum punya akun? Daftar Sekarang</string>
+    <string name="have_account">Sudah punya akun? Masuk</string>
+
+    <!-- Billing -->
+    <string name="quick_split">Quick Split</string>
+    <string name="itemized_split">Itemized Split</string>
+    <string name="bill_details">Rincian Tagihan</string>
+    <string name="summary">Ringkasan</string>
+    <string name="tax_service">Pajak &amp; Service</string>
+    <string name="discount">Diskon</string>
+    <string name="subtotal">Subtotal</string>
+    <string name="payment_dest">Tujuan Transfer:</string>
+
+    <!-- Dashboard -->
+    <string name="greeting">Halo,</string>
+    <string name="total_owed_to_you">Total Piutang (Ditagih)</string>
+    <string name="total_you_owe">Total Utang (Anda Bayar)</string>
+    <string name="main_menu">Menu Utama</string>
+
+    <!-- Profile -->
+    <string name="personal_info">Informasi Pribadi</string>
+    <string name="edit">EDIT</string>
+    <string name="save_changes">SIMPAN PERUBAHAN</string>
+    <string name="logout">KELUAR DARI AKUN</string>
+
+    <!-- More Features Strings -->
+    <string name="scan_struk">Scan Struk</string>
+    <string name="friends">Teman</string>
+    <string name="history">Riwayat</string>
+    <string name="help">Bantuan</string>
+    <string name="select_people">Pilih Orang</string>
+    <string name="assign_items">Alokasi Item</string>
+    <string name="bill_result">Hasil Tagihan</string>
+</resources>
