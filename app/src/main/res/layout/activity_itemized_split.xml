@@ -91,23 +91,29 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:layout_marginTop="8dp">
+                    android:layout_marginTop="8dp"
+                    android:gravity="center_vertical">
+
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnAddItem"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="TAMBAH MANUAL"
-                        app:cornerRadius="8dp"
+                        android:text="TAMBAH"
+                        app:cornerRadius="12dp"
+                        android:padding="12dp"
                         style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                         android:layout_marginEnd="8dp"/>
+
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnScanBill"
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_weight="1.2"
                         android:text="SCAN STRUK"
                         app:icon="@android:drawable/ic_menu_camera"
-                        app:cornerRadius="8dp"
+                        app:cornerRadius="12dp"
+                        android:padding="12dp"
                         android:backgroundTint="@color/blue_primary"/>
                 </LinearLayout>
             </LinearLayout>
