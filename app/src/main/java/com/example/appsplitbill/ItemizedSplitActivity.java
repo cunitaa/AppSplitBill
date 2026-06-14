@@ -34,15 +34,10 @@ public class ItemizedSplitActivity extends AppCompatActivity {
                         updateListAndTotal(findViewById(R.id.tvItemList), findViewById(R.id.tvTotalItemized),
                                 findViewById(R.id.etItemTax), findViewById(R.id.etItemService), findViewById(R.id.etItemDiscount));
                         
-                        // Professional Step: Show confirmation and guide to next step
-                        new androidx.appcompat.app.AlertDialog.Builder(this)
-                            .setTitle("Scan Berhasil!")
-                            .setMessage(scannedItems.size() + " menu telah ditambahkan ke daftar. Apakah kamu ingin lanjut ke pembagian orang atau tambah menu manual lagi?")
-                            .setPositiveButton("Pilih Orang", (dialog, which) -> {
-                                findViewById(R.id.btnNextItemized).performClick();
-                            })
-                            .setNegativeButton("Tambah Manual", null)
-                            .show();
+                        // User wants to go STRAIGHT to people selection after successful scan
+                        // No dialog, just a quick confirmation toast and move forward.
+                        Toast.makeText(this, scannedItems.size() + " menu ditambahkan. Lanjut pilih orang...", Toast.LENGTH_SHORT).show();
+                        findViewById(R.id.btnNextItemized).performClick();
                     }
                 }
             }
