@@ -31,11 +31,25 @@ public class ItemizedSplitActivity extends AppCompatActivity {
                             items.add(item);
                             currentSubtotal += (item.getPrice() * item.getQuantity());
                         }
+
+                        // Auto-fill Tax, Service, and Discount from Scan
+                        double taxVal = result.getData().getDoubleExtra("DETECTED_TAX", 0);
+                        double serviceVal = result.getData().getDoubleExtra("DETECTED_SERVICE", 0);
+                        double discVal = result.getData().getDoubleExtra("DETECTED_DISCOUNT", 0);
+
+                        EditText etTax = findViewById(R.id.etItemTax);
+                        EditText etService = findViewById(R.id.etItemService);
+                        EditText etDiscount = findViewById(R.id.etItemDiscount);
+
+                        // If scan finds absolute nominal, convert to percent for Tax/Service
+                        if (taxVal > 0 && currentSubtotal > 0) etTax.setText(String.valueOf(Math.round((taxVal/currentSubtotal)*100)));
+                        if (serviceVal > 0 && currentSubtotal > 0) etService.setText(String.valueOf(Math.round((serviceVal/currentSubtotal)*100)));
+                        if (discVal > 0) etDiscount.setText(String.valueOf((int)discVal));
+
                         updateListAndTotal(findViewById(R.id.tvItemList), findViewById(R.id.tvTotalItemized),
-                                findViewById(R.id.etItemTax), findViewById(R.id.etItemService), findViewById(R.id.etItemDiscount));
+                                etTax, etService, etDiscount);
                         
-                        // Fix: Don't jump automatically to give user a chance to EDIT the scanned data
-                        Toast.makeText(this, scannedItems.size() + " menu ditambahkan. Silakan cek/edit sebelum lanjut.", Toast.LENGTH_LONG).show();
+                        Toast.makeText(this, scannedItems.size() + " menu & biaya tambahan ditambahkan. Silakan cek/edit!", Toast.LENGTH_LONG).show();
                     }
                 }
             }

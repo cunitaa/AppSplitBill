@@ -112,6 +112,9 @@ public class OCRActivity extends AppCompatActivity {
             btnUseResult.setOnClickListener(v -> {
                 Intent resultIntent = new Intent();
                 resultIntent.putExtra("DETECTED_ITEMS", detectedItems);
+                resultIntent.putExtra("DETECTED_TAX", detectedTax);
+                resultIntent.putExtra("DETECTED_SERVICE", detectedService);
+                resultIntent.putExtra("DETECTED_DISCOUNT", detectedDiscount);
                 setResult(Activity.RESULT_OK, resultIntent);
                 finish();
             });
@@ -165,35 +168,52 @@ public class OCRActivity extends AppCompatActivity {
         }
     }
 
+    private double detectedTax = 0, detectedService = 0, detectedDiscount = 0;
+
     private void extractPricesAndMenu(Text text) {
         detectedItems.clear();
+        detectedTax = 0; detectedService = 0; detectedDiscount = 0;
         StringBuilder result = new StringBuilder("🔍 DETEKSI TEKS:\n");
-        String fullRawText = text.getText();
+        String fullRawText = text.getText().toLowerCase();
         
         if (fullRawText.isEmpty()) {
             runOnUiThread(() -> tvResult.setText("Arahkan ke daftar harga struk..."));
             return;
         }
 
-        // Broad search for any currency-like numbers
         Pattern pricePattern = Pattern.compile("(\\d{1,3}(?:[.,]\\d{3})+)");
         
         for (Text.TextBlock block : text.getTextBlocks()) {
             for (Text.Line line : block.getLines()) {
                 String lineText = line.getText().trim();
+                String lowerLine = lineText.toLowerCase();
                 Matcher matcher = pricePattern.matcher(lineText);
                 
                 if (matcher.find()) {
                     String priceStr = matcher.group(1).replace(".", "").replace(",", "");
                     try {
                         double price = Double.parseDouble(priceStr);
-                        // Filter out small numbers that are likely not prices (e.g., dates, quantities)
                         if (price < 100) continue; 
 
+                        // Smart detection for Tax, Service, Discount
+                        if (lowerLine.contains("pajak") || lowerLine.contains("tax") || lowerLine.contains("ppn")) {
+                            detectedTax = price;
+                            result.append("📌 Pajak: ").append(CurrencyFormatter.formatRupiah(price)).append("\n");
+                            continue;
+                        }
+                        if (lowerLine.contains("service") || lowerLine.contains("servis") || lowerLine.contains("sc")) {
+                            detectedService = price;
+                            result.append("📌 Servis: ").append(CurrencyFormatter.formatRupiah(price)).append("\n");
+                            continue;
+                        }
+                        if (lowerLine.contains("disc") || lowerLine.contains("potongan") || lowerLine.contains("promo")) {
+                            detectedDiscount = price;
+                            result.append("📌 Diskon: ").append(CurrencyFormatter.formatRupiah(price)).append("\n");
+                            continue;
+                        }
+
                         String name = lineText.replace(matcher.group(1), "").trim();
-                        // Clean up name from garbage symbols
                         name = name.replaceAll("[^a-zA-Z0-9 ]", "").trim();
-                        
                         if (name.isEmpty()) name = "Menu " + (detectedItems.size() + 1);
                         
                         detectedItems.add(new BillItem(name, price, 1));
@@ -203,9 +223,9 @@ public class OCRActivity extends AppCompatActivity {
             }
         }
 
-        if (detectedItems.isEmpty()) {
+        if (detectedItems.isEmpty() && detectedTax == 0) {
             runOnUiThread(() -> {
-                tvResult.setText("Mendeteksi teks, tapi belum menemukan daftar harga...\n\nRaw: " + (fullRawText.length() > 50 ? fullRawText.substring(0, 50) : fullRawText));
+                tvResult.setText("Mendeteksi teks, tapi belum menemukan daftar harga...");
                 btnUseResult.setVisibility(View.GONE);
             });
         } else {
@@ -215,6 +235,8 @@ public class OCRActivity extends AppCompatActivity {
             });
         }
     }
+
+
 
     private boolean allPermissionsGranted() {
         return ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
