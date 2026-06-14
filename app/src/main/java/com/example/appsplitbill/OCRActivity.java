@@ -26,6 +26,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.example.appsplitbill.model.BillItem;
+import com.google.android.material.button.MaterialButton;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.mlkit.vision.common.InputImage;
 import com.google.mlkit.vision.text.Text;
@@ -44,7 +45,7 @@ public class OCRActivity extends AppCompatActivity {
     private static final int CAMERA_PERMISSION_CODE = 100;
     private PreviewView viewFinder;
     private TextView tvResult;
-    private Button btnUseResult;
+    private MaterialButton btnScan, btnUseResult;
     private TextRecognizer recognizer;
     private ExecutorService cameraExecutor;
     private ArrayList<BillItem> detectedItems = new ArrayList<>();
@@ -52,7 +53,13 @@ public class OCRActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_ocr);
+        try {
+            setContentView(R.layout.activity_ocr);
+        } catch (Exception e) {
+            e.printStackTrace();
+            finish();
+            return;
+        }
 
         Toolbar toolbar = findViewById(R.id.toolbarOcr);
         setSupportActionBar(toolbar);
@@ -62,7 +69,7 @@ public class OCRActivity extends AppCompatActivity {
 
         viewFinder = findViewById(R.id.viewFinder);
         tvResult = findViewById(R.id.tvOcrResult);
-        Button btnScan = findViewById(R.id.btnScan);
+        btnScan = findViewById(R.id.btnScan);
         btnUseResult = findViewById(R.id.btnUseResult);
 
         recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS);
@@ -74,20 +81,24 @@ public class OCRActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_CODE);
         }
 
-        btnScan.setOnClickListener(v -> {
-            if (detectedItems.isEmpty()) {
-                Toast.makeText(this, "Arahkan kamera ke daftar harga sampai muncul rincian!", Toast.LENGTH_LONG).show();
-            } else {
-                Toast.makeText(this, "Berhasil mendeteksi " + detectedItems.size() + " menu!", Toast.LENGTH_SHORT).show();
-            }
-        });
+        if (btnScan != null) {
+            btnScan.setOnClickListener(v -> {
+                if (detectedItems.isEmpty()) {
+                    Toast.makeText(this, "Arahkan kamera ke daftar harga sampai muncul rincian!", Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(this, "Berhasil mendeteksi " + detectedItems.size() + " menu!", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
 
-        btnUseResult.setOnClickListener(v -> {
-            Intent resultIntent = new Intent();
-            resultIntent.putExtra("DETECTED_ITEMS", detectedItems);
-            setResult(Activity.RESULT_OK, resultIntent);
-            finish();
-        });
+        if (btnUseResult != null) {
+            btnUseResult.setOnClickListener(v -> {
+                Intent resultIntent = new Intent();
+                resultIntent.putExtra("DETECTED_ITEMS", detectedItems);
+                setResult(Activity.RESULT_OK, resultIntent);
+                finish();
+            });
+        }
     }
 
     private void startCamera() {

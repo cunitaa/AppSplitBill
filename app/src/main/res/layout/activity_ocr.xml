@@ -26,22 +26,24 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnScan"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="SCAN"
+            app:cornerRadius="12dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toStartOf="@id/btnUseResult"
             android:layout_marginBottom="32dp"/>
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnUseResult"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="GUNAKAN HASIL"
             android:backgroundTint="@color/success_green"
+            app:cornerRadius="12dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/btnScan"

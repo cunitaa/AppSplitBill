@@ -47,6 +47,7 @@ dependencies {
     // OCR & Camera
     implementation(libs.mlkit.text.recognition)
     implementation(libs.camera.core)
+    implementation("androidx.camera:camera-camera2:1.3.1")
     implementation(libs.camera.lifecycle)
     implementation(libs.camera.view)
 
