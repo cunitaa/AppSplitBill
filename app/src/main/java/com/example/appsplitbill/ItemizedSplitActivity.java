@@ -34,10 +34,8 @@ public class ItemizedSplitActivity extends AppCompatActivity {
                         updateListAndTotal(findViewById(R.id.tvItemList), findViewById(R.id.tvTotalItemized),
                                 findViewById(R.id.etItemTax), findViewById(R.id.etItemService), findViewById(R.id.etItemDiscount));
                         
-                        // User wants to go STRAIGHT to people selection after successful scan
-                        // No dialog, just a quick confirmation toast and move forward.
-                        Toast.makeText(this, scannedItems.size() + " menu ditambahkan. Lanjut pilih orang...", Toast.LENGTH_SHORT).show();
-                        findViewById(R.id.btnNextItemized).performClick();
+                        // Fix: Don't jump automatically to give user a chance to EDIT the scanned data
+                        Toast.makeText(this, scannedItems.size() + " menu ditambahkan. Silakan cek/edit sebelum lanjut.", Toast.LENGTH_LONG).show();
                     }
                 }
             }
