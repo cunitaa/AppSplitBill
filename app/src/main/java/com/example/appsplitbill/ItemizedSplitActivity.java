@@ -33,7 +33,16 @@ public class ItemizedSplitActivity extends AppCompatActivity {
                         }
                         updateListAndTotal(findViewById(R.id.tvItemList), findViewById(R.id.tvTotalItemized),
                                 findViewById(R.id.etItemTax), findViewById(R.id.etItemService), findViewById(R.id.etItemDiscount));
-                        Toast.makeText(this, scannedItems.size() + " item ditambahkan dari scan", Toast.LENGTH_SHORT).show();
+                        
+                        // Professional Step: Show confirmation and guide to next step
+                        new androidx.appcompat.app.AlertDialog.Builder(this)
+                            .setTitle("Scan Berhasil!")
+                            .setMessage(scannedItems.size() + " menu telah ditambahkan ke daftar. Apakah kamu ingin lanjut ke pembagian orang atau tambah menu manual lagi?")
+                            .setPositiveButton("Pilih Orang", (dialog, which) -> {
+                                findViewById(R.id.btnNextItemized).performClick();
+                            })
+                            .setNegativeButton("Tambah Manual", null)
+                            .show();
                     }
                 }
             }

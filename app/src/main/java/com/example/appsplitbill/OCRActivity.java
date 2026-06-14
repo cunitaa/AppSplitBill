@@ -26,6 +26,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.example.appsplitbill.model.BillItem;
+import com.example.appsplitbill.utils.CurrencyFormatter;
 import com.google.android.material.button.MaterialButton;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.mlkit.vision.common.InputImage;
@@ -49,6 +50,7 @@ public class OCRActivity extends AppCompatActivity {
     private TextRecognizer recognizer;
     private ExecutorService cameraExecutor;
     private ArrayList<BillItem> detectedItems = new ArrayList<>();
+    private boolean isPaused = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,10 +85,25 @@ public class OCRActivity extends AppCompatActivity {
 
         if (btnScan != null) {
             btnScan.setOnClickListener(v -> {
-                if (detectedItems.isEmpty()) {
-                    Toast.makeText(this, "Arahkan kamera ke daftar harga sampai muncul rincian!", Toast.LENGTH_LONG).show();
+                if (!isPaused) {
+                    // Action: CAPTURE/FREEZE
+                    if (detectedItems.isEmpty()) {
+                        Toast.makeText(this, "Belum ada menu terdeteksi!", Toast.LENGTH_SHORT).show();
+                    } else {
+                        isPaused = true;
+                        btnScan.setText("ULANGI");
+                        btnScan.setIconResource(android.R.drawable.ic_menu_rotate);
+                        btnUseResult.setVisibility(View.VISIBLE);
+                        Toast.makeText(this, "Teks dikunci! Klik 'GUNAKAN HASIL' jika sudah benar.", Toast.LENGTH_LONG).show();
+                    }
                 } else {
-                    Toast.makeText(this, "Berhasil mendeteksi " + detectedItems.size() + " menu!", Toast.LENGTH_SHORT).show();
+                    // Action: RESUME
+                    isPaused = false;
+                    btnScan.setText("SCAN");
+                    btnScan.setIconResource(android.R.drawable.ic_menu_camera);
+                    btnUseResult.setVisibility(View.GONE);
+                    detectedItems.clear();
+                    tvResult.setText("Arahkan ke daftar harga struk...");
                 }
             });
         }
@@ -131,6 +148,10 @@ public class OCRActivity extends AppCompatActivity {
 
     @OptIn(markerClass = ExperimentalGetImage.class)
     private void processImageProxy(ImageProxy imageProxy) {
+        if (isPaused) {
+            imageProxy.close();
+            return;
+        }
         Image mediaImage = imageProxy.getImage();
         if (mediaImage != null) {
             InputImage image = InputImage.fromMediaImage(mediaImage, imageProxy.getImageInfo().getRotationDegrees());
@@ -176,7 +197,7 @@ public class OCRActivity extends AppCompatActivity {
                         if (name.isEmpty()) name = "Menu " + (detectedItems.size() + 1);
                         
                         detectedItems.add(new BillItem(name, price, 1));
-                        result.append("✅ ").append(name).append(" -> Rp ").append(priceStr).append("\n");
+                        result.append("✅ ").append(name).append(" (").append(CurrencyFormatter.formatRupiah(price)).append(")\n");
                     } catch (Exception ignored) {}
                 }
             }
