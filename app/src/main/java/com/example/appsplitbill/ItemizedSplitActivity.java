@@ -69,6 +69,10 @@ public class ItemizedSplitActivity extends AppCompatActivity {
             btnScan.setOnClickListener(v -> ocrLauncher.launch(new Intent(this, OCRActivity.class)));
         }
 
+        if (getIntent().getBooleanExtra("OPEN_OCR", false)) {
+            ocrLauncher.launch(new Intent(this, OCRActivity.class));
+        }
+
         btnAdd.setOnClickListener(v -> {
             String name = etName.getText().toString();
             String priceS = etPrice.getText().toString();

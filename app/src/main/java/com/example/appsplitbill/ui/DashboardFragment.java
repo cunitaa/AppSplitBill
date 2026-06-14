@@ -42,7 +42,13 @@ public class DashboardFragment extends Fragment {
 
         binding.btnQuickSplitCard.setOnClickListener(v -> startActivity(new Intent(getActivity(), QuickSplitActivity.class)));
         binding.btnItemizedSplitCard.setOnClickListener(v -> startActivity(new Intent(getActivity(), ItemizedSplitActivity.class)));
-        binding.btnScanBillCard.setOnClickListener(v -> startActivity(new Intent(getActivity(), OCRActivity.class)));
+        
+        binding.btnScanBillCard.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), ItemizedSplitActivity.class);
+            intent.putExtra("OPEN_OCR", true);
+            startActivity(intent);
+        });
+
         binding.btnFriendsCard.setOnClickListener(v -> startActivity(new Intent(getActivity(), FriendsActivity.class)));
         
         binding.btnGroupsCard.setOnClickListener(v -> {
