@@ -13,14 +13,8 @@ public class SplashActivity extends AppCompatActivity {
         setContentView(R.layout.activity_splash);
 
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            android.content.SharedPreferences sp = getSharedPreferences("AppPrefs", MODE_PRIVATE);
-            String userEmail = sp.getString("userEmail", null);
-
-            if (userEmail != null) {
-                startActivity(new Intent(SplashActivity.this, MainActivity.class));
-            } else {
-                startActivity(new Intent(SplashActivity.this, LoginActivity.class));
-            }
+            // Always go to Login for now as requested by user to ensure it's visible
+            startActivity(new Intent(SplashActivity.this, LoginActivity.class));
             finish();
         }, 2000);
     }
