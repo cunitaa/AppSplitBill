@@ -38,12 +38,29 @@ public class LoginActivity extends AppCompatActivity {
                 return;
             }
 
-            // Save login state
-            getSharedPreferences("AppPrefs", MODE_PRIVATE).edit().putString("userEmail", email).apply();
+            // Check if user exists
+            String userJson = getSharedPreferences("AppPrefs", MODE_PRIVATE).getString("user_data_" + email, null);
+            
+            if (userJson != null) {
+                User user = new Gson().fromJson(userJson, User.class);
+                if (user.getPassword() != null && user.getPassword().equals(pass)) {
+                    // Save login state
+                    getSharedPreferences("AppPrefs", MODE_PRIVATE).edit().putString("userEmail", email).apply();
+                    
+                    // Also ensure the user_profile key is set for compatibility with other parts of the app
+                    getSharedPreferences("AppPrefs", MODE_PRIVATE).edit()
+                            .putString(StorageUtils.getUserKey(this, "user_profile"), userJson)
+                            .apply();
 
-            Toast.makeText(this, "Login Berhasil!", Toast.LENGTH_SHORT).show();
-            startActivity(new Intent(LoginActivity.this, MainActivity.class));
-            finish();
+                    Toast.makeText(this, "Login Berhasil!", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                    finish();
+                } else {
+                    Toast.makeText(this, "Password salah!", Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                Toast.makeText(this, "User belum terdaftar!", Toast.LENGTH_SHORT).show();
+            }
         });
 
         btnDemo.setOnClickListener(v -> {

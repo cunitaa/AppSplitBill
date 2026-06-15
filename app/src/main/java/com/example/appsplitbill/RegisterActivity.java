@@ -1,6 +1,5 @@
 package com.example.appsplitbill;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.TextView;
@@ -35,20 +34,21 @@ public class RegisterActivity extends AppCompatActivity {
                 return;
             }
 
-            // Save user session
-            getSharedPreferences("AppPrefs", MODE_PRIVATE).edit().putString("userEmail", email).apply();
-
-            // Create and save initial profile
+            // Create and save user data including password
             User user = new User(String.valueOf(System.currentTimeMillis()), name, email);
+            user.setPassword(pass);
             user.setBankInfo("Belum diatur");
             user.setWhatsapp("");
+            
+            // Save to shared preferences using email as key to support login verification
+            String userJson = new Gson().toJson(user);
             getSharedPreferences("AppPrefs", MODE_PRIVATE).edit()
-                    .putString(StorageUtils.getUserKey(this, "user_profile"), new Gson().toJson(user))
+                    .putString("user_data_" + email, userJson)
                     .apply();
 
-            Toast.makeText(this, "Pendaftaran Berhasil!", Toast.LENGTH_SHORT).show();
-            startActivity(new Intent(RegisterActivity.this, MainActivity.class));
-            finishAffinity();
+            Toast.makeText(this, "Pendaftaran Berhasil! Silakan Login.", Toast.LENGTH_SHORT).show();
+            // Go back to login screen
+            finish();
         });
 
         tvLogin.setOnClickListener(v -> finish());
